@@ -11,58 +11,35 @@ abstract class StringMath {
 	public static String toStringNumber(float x) { return (toStringNumber(Float.toString(x))); }
 	public static String toStringNumber(boolean x) { return ( x ? "1" : "0" ); }
 	public static String toStringNumber(String x) {
-		if( x.equals("0") || x.length() == 0 || x.equals("-") || x.equals(".") ) return "0";
-		boolean foundNegative = false;
-		boolean foundDecimal = false;
-		String strNum = "";
-		for(int n=0;n<x.length();n++) { 
-			// remove any out of place decimals, negative symbols, and remove any non-numbers that are not out of place decimals or negative symbols;
-			if( x.charAt(n) == '.' ) {
-				if( !foundNegative ) foundNegative = true;
-				if( !foundDecimal ) {
-					strNum += x.charAt(n);
-					foundDecimal = true;
-				} continue;
-			}
-			if( x.charAt(n) == '-' ) {
-				if( !foundNegative ) {
-					strNum += x.charAt(n);
-					foundNegative = true;
-				} continue;
-			}
-			if( x.charAt(n) >= 48 && x.charAt(n) <= 57 ) { strNum += x.charAt(n); }
+		// StringNumbers have no leading or trailing zeros, no non-number characters, except a decimal point and or negative symbol if necessary as of now;
+		String stringNumberTemp = "";
+		boolean isNegative = false;
+		boolean isDecimal = false;
+		// Create a valid StringNumber;
+		for(int n=0;n<x.length();n++) {
+			if( x.charAt(n) == '-' && !isNegative && !isDecimal )
+				isNegative = true;
+			else if( x.charAt(n) == '.' && !isDecimal ) {
+				isDecimal = true;
+				stringNumberTemp += ".";
+			} else if( x.charAt(n) >= 48 && x.charAt(n) <= 57 ) 
+				stringNumberTemp += x.charAt(n);
 		}
-		// add or remove 0's in appropriate places: 
-		if ( strNum.length() == 0 || strNum.equals("-") || strNum.equals(".") || strNum.equals("-.") ) return "0";
-		if ( strNum.charAt(strNum.length()-1) == '.' ) strNum += "0"; 
-		if ( strNum.charAt(0) == '.' ) strNum = "0" + strNum;
-		else if ( strNum.charAt(0) == '-' && strNum.charAt(1) == '.' ) strNum = strNum.substring(0,1) + "0" + strNum.substring(1,strNum.length());
-		boolean hasPassedFirstNonZero = false;
-		boolean decimalExists = false;
-		String temp = ( strNum.charAt(0) == '-' ? "-" : "" );
-		for( int n=temp.length();n<strNum.length();n++) { // remove any zero before any non-zero and ignore the negative sign;
-			if( strNum.charAt(n) == '.' ) {
-				decimalExists = true;
-				if( temp.equals("-") || temp.length() == 0 ) temp += "0";
-			}
-			if( strNum.charAt(n) != '0' || hasPassedFirstNonZero ) {
-				hasPassedFirstNonZero = true;
-				temp += strNum.charAt(n);
-			}
-		}
-		// return "0" if not a valid strNum;
-		if( temp.equals("-.0") || temp.equals("-0.0") || temp.equals(".0") || temp.equals("0.0") || temp.length() == 0 ) return "0";
-		// set temp to strNum;
-		strNum = temp;
-		// remove any non-valid zero's after the decimal if one exists: 
-		if( decimalExists ) { // remove any zero's after the final non-zero number after the decimal point;
-			int positionToRemoveExtraZeros = 0;
-			for(int n=strNum.length()-1;n>=0;n--) if( strNum.charAt(n) != '0' ) { positionToRemoveExtraZeros = n+1; break; }
-			strNum = strNum.substring(0,positionToRemoveExtraZeros);
-		}
-		if( strNum.length() > 1 && strNum.charAt(strNum.length()-1) == '.' ) return strNum.substring(0,strNum.length()-1);
-		if( strNum.equals("-") ) return "0";
-		return strNum;
+		// Remove unnecessary zeros: then add in the appropriate zeros and negative sign if necessary;
+		String returnStringNumber = stringNumberTemp;
+		if( returnStringNumber.length() > 1 ) {
+			for( int n = 0; stringNumberTemp.charAt(n) == '0'; n++ ) 
+				returnStringNumber = returnStringNumber.substring(1, returnStringNumber.length());
+			if( isDecimal )
+				for( int n = stringNumberTemp.length()-1; n >= 0 && stringNumberTemp.charAt(n) == '0' ; n-- )
+					returnStringNumber = returnStringNumber.substring(0, returnStringNumber.length()-1);
+			if( returnStringNumber.charAt(0) == '.' ) returnStringNumber = "0" + returnStringNumber;
+			if( returnStringNumber.charAt(returnStringNumber.length()-1) == '.' ) returnStringNumber += "0";
+		} // could be '', '.', '-', 0.0, -0.0, 0.x, -0.x, x.0, -x.0, x.x, -x.x,x x, -x;
+		if( isNegative ) returnStringNumber = "-" + returnStringNumber;
+		return (
+			returnStringNumber.length() == 0 || returnStringNumber.equals(".") || returnStringNumber.equals("-") || 
+			returnStringNumber.equals("0.0") || returnStringNumber.equals("-0.0") || returnStringNumber.equals("-.") ? "0" : returnStringNumber );
 	}
 	
 	// public static methods: 
@@ -83,7 +60,7 @@ abstract class StringMath {
 				ret = parseToPerformOperation( ret, 
 					( x[l].get(n) instanceof Boolean ? ( (Boolean)x[l].get(n) ?  "1" : "0" ) : new StringNumber( x[l].get(n).toString() ).get() ),
 					StringMathOperation.ADD );
-		return new StringNumber(ret);//}
+		return new StringNumber(ret);
 	}
 	// SUB: 
 	public static String sub( String... x ) {
@@ -102,7 +79,6 @@ abstract class StringMath {
 		for(int n=1;n<x.length;n++) ret = parseToPerformOperation( ret, x[n], StringMathOperation.MULT );
 		return ret;
 	}
-	// MULT: 
 	public static String div( String... x ) {
 		String ret = x[0];
 		for(int n=0;n<x.length;n++) if(toStringNumber(x[n]).equals("0")) return "0";
@@ -148,7 +124,7 @@ abstract class StringMath {
 		for(int x=0;x<n.length;x++)
 			if( decimalPosition[x] != n[x].length()) 
 				n[x] = n[x].substring( 0, decimalPosition[x] ) + n[x].substring( decimalPosition[x]+1, n[x].length() );
-		// return 0 if both strings are empty;
+		// return 0 if necessary: 
 		if ( n[0].length() == 0 && n[1].length() == 0 ) return "0";
 		// do the function: 
 		String result = "";
@@ -169,14 +145,14 @@ abstract class StringMath {
 					!isTopNumberSmaller && !isNegative[0] && isNegative[1] ) isOutputNegative = false;
 			} break;
 			case SUB: {
-				// while each first digit is the same, remove the first digit from both numbers and set the decimal length to n-1: 
+				// while each first/last digit is the same, remove the first/last digit from both numbers and set the decimal length to n-1: 
 				while( n[0].length() > 0 && n[1].length() > 0 && n[0].charAt(0) == n[1].charAt(0) )
 					for( int x=0;x<n.length;x++ ) { n[x] = n[x].substring(1, n[x].length()); decimalPosition[x] -= 1; }
-				// while each last digit is the same, remove the last digit from both numbers: 
 				while( n[0].length() > 0 && n[1].length() > 0 && n[0].charAt(n[0].length()-1) == n[1].charAt(n[1].length()-1) )
-				for( int x=0;x<n.length;x++ ) { n[x] = n[x].substring(0, n[x].length()-1); }
-				if( a.equals("0") ) return b; if( b.equals("0") ) return a;//break;//
+					for( int x=0;x<n.length;x++ ) { n[x] = n[x].substring(0, n[x].length()-1); }
 				if ( n[0].length() == 0 && n[1].length() == 0 ) return "0";
+				if( a.equals("0") ) return b; if( b.equals("0") ) return a;
+				isTopNumberSmaller = ( n[0].charAt(0) < n[1].charAt(0) );
 				result = (	isNegative[0] && isNegative[1] || !isNegative[0] && !isNegative[1] ? 
 								( isTopNumberSmaller ? subtractFunction( n[1], n[0] ) : subtractFunction( n[0], n[1] ) ): 
 									addFunction( n[0], n[1] ) );
@@ -197,7 +173,7 @@ abstract class StringMath {
 				isOutputNegative = ( isNegative[0] && !isNegative[1] || !isNegative[0] && isNegative[1] );
 			}
 		}
-		// add back in decimal at position from length - decimalPosition;
+		// add in the decimal if necessary: 
 		if( decimalExists ) {
 			if( decimalPosition[0] < 0 ) {
 				for( int x=decimalPosition[0];x<0;x++ )
@@ -229,6 +205,7 @@ abstract class StringMath {
 		for( int x= a.length()-1; x >= 0; x-- ) {
 			int top = Character.getNumericValue( a.charAt(x) ) + ( borrow ? -1 : 0 );
 			int bottom = Character.getNumericValue( b.charAt(x) );
+//			if( a.charAt(x) == b.charAt(x) ) { result = "0" + result; borrow = false; continue;}
 			if( top < bottom ) { top += 10 ; borrow = true; }
 			else borrow = false;
 			result = String.valueOf( ( top-bottom > 9 ? top-bottom-10 : top-bottom ) ) + result;
@@ -236,26 +213,24 @@ abstract class StringMath {
 	}
 	private static String multiplyFunction(String a, String b) { // perform the multiplication function: 
 		String result = "";
-		String zerosToAddPerIteration = ""; // zeros must be added to the end of the number after each iteration because multiplication;
+		String zerosToAddPerIteration = ""; // zeros must be added to the end of the number after each iteration because of multiplication;
 		for( int x=a.length()-1; x >= 0; x-- ) {
-			String resultToAddToResult = "";
+			String iterationResult = "";
 			String carry = "0";
 			for( int y=a.length()-1; y >= 0; y-- ) {
 				String innerResult = "0";
 				for( int z=0;z < ( a.charAt(y)>b.charAt(x) ? Character.getNumericValue(b.charAt(x)) : Character.getNumericValue(a.charAt(y)) );z++ ){
 					String tempA = Character.toString( ( a.charAt(y) > b.charAt(x) ? a.charAt(y) : b.charAt(x) ) );
-					while(tempA.length()<innerResult.length()) tempA = "0" + tempA;
-					innerResult = addFunction( innerResult, tempA );
+					innerResult = addFunction( innerResult, ( tempA.length()<innerResult.length()) ? "0"+tempA : tempA );
 				}
-				while(carry.length()<innerResult.length()) carry = "0" + carry;
-				innerResult = addFunction( innerResult, carry);
+				innerResult = addFunction( innerResult, ( carry.length()<innerResult.length() ? "0"+carry : carry ) );
 				carry = ( innerResult.length() > 1 ? Character.toString( innerResult.charAt(0) ) : "0" );
-				resultToAddToResult = innerResult.charAt(innerResult.length()-1) + resultToAddToResult;
+				iterationResult = innerResult.charAt(innerResult.length()-1) + iterationResult;
 			}
-			resultToAddToResult = carry + resultToAddToResult + zerosToAddPerIteration;
+			iterationResult = carry + iterationResult + zerosToAddPerIteration;
 			zerosToAddPerIteration += "0";
-			while( result.length() < resultToAddToResult.length() ) result = "0" + result;
-			result = addFunction( resultToAddToResult, result );
+			result = (	x == a.length()-1 ? 
+							iterationResult : addFunction( iterationResult, ( result.length() < iterationResult.length() ? "0" + result : result ) ));
 		} return result;
 	}
 	private static String divideFunction(String a, String b) {

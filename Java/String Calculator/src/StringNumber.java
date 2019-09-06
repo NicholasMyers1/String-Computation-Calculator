@@ -2,7 +2,7 @@
 public class StringNumber extends StringMath{
 	// Used for specific instance of StringNumber;
 	private String stringNumber;
-	private String initialStringnumber;
+	private String initialStringNumber;
 	// ADD: 
 	public void add(StringNumber x) { stringNumber = add(stringNumber, x.get()); } 
 	public void add(String x) { stringNumber = add(stringNumber, x); } 
@@ -16,16 +16,16 @@ public class StringNumber extends StringMath{
 	public void div(StringNumber x) { stringNumber = div(stringNumber, x.get());}
 	public void div(String x) { stringNumber = div(stringNumber, x);}
 	// Constructor: 
-	StringNumber() { stringNumber = "0"; initialStringnumber = stringNumber; }
-	StringNumber( StringNumber x ) { stringNumber = x.get(); initialStringnumber = stringNumber; }
-	StringNumber( String n ){ set(n); initialStringnumber = stringNumber; }
-	StringNumber( int n ){ set(Integer.toString(n)); initialStringnumber = stringNumber; }
-	StringNumber( double n ){ set(Double.toString(n)); initialStringnumber = stringNumber; }
-	StringNumber( float n ){ set(Float.toString(n)); initialStringnumber = stringNumber; }
-	StringNumber( boolean n ){ set(Boolean.toString(n)); initialStringnumber = stringNumber; }
+	StringNumber() { stringNumber = "0"; initialStringNumber = stringNumber; }
+	StringNumber( StringNumber x ) { stringNumber = x.get(); initialStringNumber = stringNumber; }
+	StringNumber( String n ){ set(n); initialStringNumber = stringNumber; }
+	StringNumber( int n ){ set(Integer.toString(n)); initialStringNumber = stringNumber; }
+	StringNumber( double n ){ set(Double.toString(n)); initialStringNumber = stringNumber; }
+	StringNumber( float n ){ set(Float.toString(n)); initialStringNumber = stringNumber; }
+	StringNumber( boolean n ){ set(Boolean.toString(n)); initialStringNumber = stringNumber; }
 	// Get and Set: 
 	String get() { return stringNumber; }
-	public void reset() { stringNumber = initialStringnumber; }
+	public void reset() { stringNumber = initialStringNumber; }
 	public void set() { stringNumber = "0"; }
 	public void set(StringNumber x) { stringNumber = x.get(); }
 	public void set(String x) { stringNumber = toStringNumber(x); }

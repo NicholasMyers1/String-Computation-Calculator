@@ -26,7 +26,7 @@ public class StringNumber extends StringMath{
 	public StringNumber( float n ){ set(Float.toString(n)); initialStringNumber = stringNumber; }
 	public StringNumber( long n ){ set(Long.toString(n)); initialStringNumber = stringNumber; }
 	public StringNumber( BigInteger n ){ set(n.toString()); initialStringNumber = stringNumber; }
-	public StringNumber( boolean n ){ set(n ? "1" : "0"); initialStringNumber = stringNumber; }
+	public StringNumber( boolean n ){ stringNumber = (n ? "1" : "0"); initialStringNumber = stringNumber; }
 	// Get, Set, and Reset: 
 	public String get() { return stringNumber; }
 	public void reset() { stringNumber = initialStringNumber; }
